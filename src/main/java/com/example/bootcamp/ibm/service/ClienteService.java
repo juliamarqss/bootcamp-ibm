@@ -2,7 +2,9 @@ package com.example.bootcamp.ibm.service;
 
 
 import com.example.bootcamp.ibm.domain.Cliente;
+import com.example.bootcamp.ibm.dto.ClienteDto;
 import com.example.bootcamp.ibm.repository.ClienteRepository;
+import com.example.bootcamp.ibm.service.exceptions.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +22,27 @@ public class ClienteService {
         return obj;
     }
 
-    public Optional<Cliente> find(Integer id){
+    public Cliente find(Integer id){
         Optional<Cliente> obj = repository.findById(id);
-        return obj;
+        return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! Id: " + id + Cliente.class.getName()));
+    }
+
+    public void delete(Integer id){
+        repository.deleteById(id);
+    }
+
+    public Cliente update(Cliente obj){
+        Cliente att = find(obj.getId());
+        updateData(att, obj);
+        return repository.save(att);
+    }
+
+    private void updateData(Cliente novo, Cliente antigo){
+        novo.setNome(antigo.getNome());
+        novo.setEmail(antigo.getEmail());
+    }
+
+    public Cliente fromDto(ClienteDto objDto){
+        return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail());
     }
 }
